@@ -63,7 +63,9 @@ jobs:
 
     # Copy the executable into the package (adjust the path if necessary)
     - name: Copy compiled binary into package
-      run: cp -r Build/flamerobin flamerobin/templates/trees/deb/flamerobin/usr/local/bin
+      run: |
+        ls -a
+        cp -r Build/flamerobin flamerobin/templates/trees/deb/flamerobin/usr/local/bin
 
     # Generate the .deb file
     - name: Build .deb package
