@@ -57,24 +57,26 @@ jobs:
     - name: Build Flamerobin
       run: cmake --build Build --config Release -j$(nproc)
 
-    # Check where the generated binary is
-    - name: Find compiled executable
+    # Check where the generated binary is (flamerobin)
+    - name: Locate the compiled executable file for flamerobin
       run: find Build/ -type f -executable
 
-    # Copy the executable into the package (adjust the path if necessary)
-    - name: Copy compiled binary into package
+    # Set the version of the flamerobin program and move its executable to templates/trees/deb/flamerobin/usr/local/bin 
+    - name: Set the version of the Flamerobin program and move its executable to "templates/trees/deb/flamerobin/usr/local/bin"
       run: |
-        ls -a
-        cp -r Build/flamerobin flamerobin/templates/trees/deb/flamerobin/usr/local/bin
+        sed -i "s/^Version: .*/Version: ${FLAMEROBIN_VERSION}/" templates/trees/deb/flamerobin/DEBIAN/control
+        cp -r Build/flamerobin templates/trees/deb/flamerobin/usr/local/bin
+      env:
+        FLAMEROBIN_VERSION: ${{ env.flamerobin-version }}
 
     # Generate the .deb file
     - name: Build .deb package
       run: |
-        dpkg-deb --build flamerobin/templates/trees/deb/flamerobin flamerobin/templates/trees/deb/flamerobin-${{ env.flamerobin-version }}.deb
+        dpkg-deb --build templates/trees/deb/flamerobin templates/trees/deb/flamerobin-${{ env.flamerobin-version }}.deb
 
     # Uploading the installer as a GitHub Actions artifact
     - name: Upload .deb package
       uses: actions/upload-artifact@v4
       with:
         name: flamerobin-deb
-        path: flamerobin/templates/trees/deb/flamerobin-${{ env.flamerobin-version }}.deb
+        path: templates/trees/deb/flamerobin-${{ env.flamerobin-version }}.deb
