@@ -87,6 +87,7 @@ jobs:
     # Set the version of the flamerobin program and move its executable to -> templates/trees/deb/flamerobin/opt/flamerobin/bin/ 
     - name: Set the version of the Flamerobin program and move its executable to "templates/trees/deb/flamerobin/opt/flamerobin/bin/"
       run: |
+        cat templates/trees/deb/flamerobin/DEBIAN/control
         sed -i "s/^Version: .*/Version: ${FLAMEROBIN_VERSION}/" templates/trees/deb/flamerobin/DEBIAN/control
         mkdir -p templates/trees/deb/flamerobin/opt/flamerobin/bin 2> /dev/null
         cp -r Build/flamerobin templates/trees/deb/flamerobin/opt/flamerobin/bin/
