@@ -54,6 +54,32 @@ sudo update-desktop-database /usr/local/share/applications/ &> /dev/null
 
 
 
+# Symbolic link for the executable (flamerobin) 
+checkBinDir="false"
+if [[ -e "/usr/local/bin/" ]] && [[ -d "/usr/local/bin/" ]] && [[ ` echo "$PATH" | grep "\/usr\/local\/bin" ` ]]
+then
+    ln -sf /opt/flamerobin/bin/flamerobin "/usr/local/bin/flamerobin" &> /dev/null 
+
+    #
+    checkBinDir="true"
+fi
+
+#
+if [[ $checkBinDir == "false" ]]
+then
+
+    #
+    if [[ -e "/usr/bin/" ]] && [[ -d "/usr/bin/" ]] && [[ ` echo "$PATH" | grep "\/usr\/bin" ` ]]
+    then
+        ln -sf /opt/flamerobin/bin/flamerobin "/usr/bin/flamerobin" &> /dev/null 
+
+        #
+        checkBinDir="true"
+    fi
+fi
+
+
+
 # Just to print the name of the author
 echo ""
 echo ""
