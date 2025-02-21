@@ -44,14 +44,14 @@ jobs:
       run: |
         cd wxWidgets
         mkdir build && cd build
-        cmake .. -DwxBUILD_SHARED=OFF -DCMAKE_BUILD_TYPE=Release
+        cmake .. -DCMAKE_BUILD_TYPE=Release
         make -j$(nproc)
         sudo make install
         sudo ldconfig
 
     # Building the CMake project for Flamerobin
     - name: Generate CMake project
-      run: cmake -S . -B Build -DSTATIC_BUILD=ON -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=/usr/local
+      run: cmake -S . -B Build -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=/usr/local
 
     # FlameRobin Compilation
     - name: Build Flamerobin
@@ -59,7 +59,7 @@ jobs:
 
     # Check where the generated binary is (flamerobin)
     - name: Locate the compiled executable file for flamerobin
-      run: find Build/ -type f -executable
+      run: find Build/ -name "flamerobin" -type f
 
     # Set the version of the flamerobin program and move its executable to templates/trees/deb/flamerobin/usr/local/bin 
     - name: Set the version of the Flamerobin program and move its executable to "templates/trees/deb/flamerobin/usr/local/bin"
