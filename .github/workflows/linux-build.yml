@@ -59,12 +59,15 @@ jobs:
 
     # Check where the generated binary is (flamerobin)
     - name: Locate the compiled executable file for flamerobin
-      run: find Build/ -name "flamerobin" -type f
+      run: |
+        find Build/ -name "flamerobin" -type f
+        du -skh Build/flamerobin
 
     # Set the version of the flamerobin program and move its executable to templates/trees/deb/flamerobin/usr/local/bin 
     - name: Set the version of the Flamerobin program and move its executable to "templates/trees/deb/flamerobin/usr/local/bin"
       run: |
         sed -i "s/^Version: .*/Version: ${FLAMEROBIN_VERSION}/" templates/trees/deb/flamerobin/DEBIAN/control
+        mkdir -p templates/trees/deb/flamerobin/usr/local/bin 2> /dev/null
         cp -r Build/flamerobin templates/trees/deb/flamerobin/usr/local/bin
       env:
         FLAMEROBIN_VERSION: ${{ env.flamerobin-version }}
