@@ -83,14 +83,6 @@ jobs:
         cp -r Build/flamerobin templates/trees/deb/flamerobin/opt/flamerobin/bin/
       env:
         FLAMEROBIN_VERSION: ${{ env.flamerobin-version }}
-
-    # Set the version of the flamerobin program and move its executable to -> templates/trees/deb/flamerobin/opt/flamerobin/bin/ 
-    - name: Set the version of the Flamerobin program and move its executable to "templates/trees/deb/flamerobin/opt/flamerobin/bin/"
-      run: |
-        cat templates/trees/deb/flamerobin/DEBIAN/control
-        sed -i "s/^Version: .*/Version: ${FLAMEROBIN_VERSION}/" templates/trees/deb/flamerobin/DEBIAN/control
-        mkdir -p templates/trees/deb/flamerobin/opt/flamerobin/bin 2> /dev/null
-        cp -r Build/flamerobin templates/trees/deb/flamerobin/opt/flamerobin/bin/
     
     # Copy some necessary files except "flamerobin" to -> /opt/flamerobin/share/flamerobin
     - name: Copy necessary files to package directory "/opt/flamerobin/share/flamerobin/"
