@@ -1,5 +1,0 @@
-[templateInfo]
-menuCaption=Select ... from {%object_name%} where ...
-menuPosition=10
-matchesType=^TABLE$|^VIEW$
-

@@ -1,3 +1,0 @@
-{%object_ddl%}
-{%foreach:trigger::before:{%object_ddl%}%}
-{%foreach:trigger::after:{%object_ddl%}%}
