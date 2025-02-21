@@ -22,7 +22,7 @@ jobs:
     - name: Install dependencies
       run: |
         sudo apt update
-        sudo apt install -y build-essential cmake libwxgtk3.2-dev dpkg-dev libfbclient-dev     
+        sudo apt install -y build-essential cmake libwxgtk3.2-dev dpkg-dev libfbclient-dev 
 
     # Cache wxWidgets if already built
     - name: wxWidget cache
