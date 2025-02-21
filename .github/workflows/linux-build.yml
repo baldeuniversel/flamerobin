@@ -22,7 +22,7 @@ jobs:
     - name: Install dependencies
       run: |
         sudo apt update
-        sudo apt install -y build-essential cmake libwxgtk3.2-dev dpkg-dev libfbclient2
+        sudo apt install -y build-essential cmake libwxgtk3.2-dev dpkg-dev libfbclient2 firebird3.0-server firebird3.0-utils
 
     # Cache wxWidgets if already built
     - name: wxWidget cache
@@ -44,16 +44,6 @@ jobs:
         cd wxWidgets
         mkdir build && cd build
         cmake .. -DwxBUILD_SHARED=OFF -DCMAKE_BUILD_TYPE=Release
-        make -j$(nproc)
-        sudo make install
-        sudo ldconfig
-        
-    # Clone and compile libfbclient
-    - name: Clone and build libfbclient
-      run: |
-        git clone https://github.com/FirebirdSQL/firebird.git
-        ./autogen.sh
-        ./configure --prefix=/usr/local
         make -j$(nproc)
         sudo make install
         sudo ldconfig
