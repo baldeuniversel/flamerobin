@@ -2,6 +2,7 @@ name: Build FlameRobin for Debian
 
 env:
   wx-tag-version: v3.2.6
+  flamerobin-version: 0.9.13 
 
 on:
   push:
@@ -35,7 +36,7 @@ jobs:
     # Clone and compile wxWidgets if not already cached
     - if: ${{ steps.cache-wxwidget.outputs.cache-hit != 'true' }}
       name: Clone wxWidgets
-      run: git clone --recursive --branch ${{env.wx-tag-version}} --depth 1 https://github.com/wxWidgets/wxWidgets.git
+      run: git clone --recursive --branch ${{ env.wx-tag-version }} --depth 1 https://github.com/wxWidgets/wxWidgets.git
 
     - if: ${{ steps.cache-wxwidget.outputs.cache-hit != 'true' }}
       name: Build wxWidgets
@@ -59,21 +60,18 @@ jobs:
     - name: Find compiled executable
       run: find Build/ -type f -executable
 
-    # Copy the Debian tree from the repo to the build environment
-    - name: Copy Debian package structure
-      run: cp -r deb-package/ package/
-
     # Copy the executable into the package (adjust the path if necessary)
     - name: Copy compiled binary into package
-      run: cp Build/flamerobin package/usr/local/bin/
+      run: cp -r Build/flamerobin flamerobin/templates/trees/deb/flamerobin/usr/local/bin
 
     # Generate the .deb file
     - name: Build .deb package
-      run: dpkg-deb --build package flamerobin.deb
+      run: |
+        dpkg-deb --build flamerobin/templates/trees/deb/flamerobin flamerobin/templates/trees/deb/flamerobin-${{ env.flamerobin-version }}.deb
 
     # Uploading the installer as a GitHub Actions artifact
     - name: Upload .deb package
       uses: actions/upload-artifact@v4
       with:
         name: flamerobin-deb
-        path: flamerobin.deb
+        path: flamerobin/templates/trees/deb/flamerobin-${{ env.flamerobin-version }}.deb
