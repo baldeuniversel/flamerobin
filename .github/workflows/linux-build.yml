@@ -47,6 +47,16 @@ jobs:
         make -j$(nproc)
         sudo make install
         sudo ldconfig
+        
+    # Clone and compile libfbclient
+    - name: Clone and build libfbclient
+      run: |
+        git clone https://github.com/FirebirdSQL/firebird.git
+        ./autogen.sh
+        ./configure --prefix=/usr/local
+        make -j$(nproc)
+        sudo make install
+        sudo ldconfig
 
     # Building the CMake project for Flamerobin
     - name: Generate CMake project
