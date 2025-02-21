@@ -72,7 +72,7 @@ jobs:
      # Add the lib depends of the flamerobin build app to -> templates/trees/deb/flamerobin/opt/flamerobin/lib/
     - name: Add the lib depends of the flamerobin app to "templates/trees/deb/flamerobin/opt/flamerobin/lib/"
       run: |
-        mkdir templates/trees/deb/flamerobin/opt/flamerobin/lib 2> /dev/null
+        mkdir -p templates/trees/deb/flamerobin/opt/flamerobin/lib 2> /dev/null
         ldd Build/flamerobin | awk '{print $3}' | grep -E '/lib|/usr/lib' | grep -v "not found" | xargs -I {} cp -v {} templates/trees/deb/flamerobin/opt/flamerobin/lib/
         
     # Set the version of the flamerobin program and move its executable to -> templates/trees/deb/flamerobin/opt/flamerobin/bin/ 
