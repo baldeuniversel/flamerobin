@@ -99,10 +99,15 @@ jobs:
         mkdir -p templates/trees/deb/flamerobin/opt/flamerobin/share/flamerobin 2> /dev/null
         rsync -av --exclude=flamerobin Build/ templates/trees/deb/flamerobin/opt/flamerobin/share/flamerobin/
 
+    # Verify if the `FLAMEROBIN_VERSION` variable is accessible
+    - name: Verify the presense of the FLAMEROBIN_VERSION variable
+      run: |
+        echo "FLAMEROBIN_VERSION is: ${FLAMEROBIN_VERSION}"
+
     # Generate the .deb file
     - name: Build .deb package
       run: |
-        dpkg-deb --build templates/trees/deb/flamerobin templates/trees/deb/flamerobin-${{ env.FLAMEROBIN_VERSION }}.deb
+        dpkg-deb --build templates/trees/deb/flamerobin templates/trees/deb/flamerobin-${FLAMEROBIN_VERSION}.deb
 
     # Uploading the installer as a GitHub Actions artifact
     - name: Upload .deb package
