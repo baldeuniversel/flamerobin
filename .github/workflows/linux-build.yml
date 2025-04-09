@@ -103,13 +103,10 @@ jobs:
     - name: Build .deb package
       run: |
         dpkg-deb --build templates/trees/deb/flamerobin templates/trees/deb/flamerobin-${FLAMEROBIN_VERSION}.deb
-        
-        # List the content of the dir
-        ls -l templates/trees/deb
 
     # Uploading the installer as a GitHub Actions artifact
     - name: Upload .deb package
       uses: actions/upload-artifact@v4
       with:
         name: flamerobin-deb
-        path: templates/trees/deb/flamerobin-${FLAMEROBIN_VERSION}.deb
+        path: templates/trees/deb/flamerobin-${{ env.FLAMEROBIN_VERSION }}.deb
