@@ -457,8 +457,6 @@ void DatabaseRegistrationDialog::OnBrowseButtonClick(wxCommandEvent& WXUNUSED(ev
     // Declare a string to hold the path of the last used directory.
     wxString lastUsedDirectory;
 
-    bool flagFlush = true; 
-
     // Build a cross-platform configuration directory path.
     // `wxStandardPaths::Get().GetUserConfigDir()` retrieves the user's configuration directory.
     // `wxFILE_SEP_PATH` ensures the correct path separator is used for the current platform (e.g., '/' on Linux, '\\' on Windows).
