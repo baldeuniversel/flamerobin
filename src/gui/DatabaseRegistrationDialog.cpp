@@ -40,6 +40,12 @@
 #include "gui/StyleGuide.h"
 #include "metadata/database.h"
 #include "metadata/server.h"
+#include <wx/config.h>
+#include <wx/fileconf.h>
+
+
+
+
 
 DatabaseRegistrationDialog::DatabaseRegistrationDialog(wxWindow* parent,
         const wxString& title, bool createDB, bool connectAs)
@@ -436,13 +442,73 @@ BEGIN_EVENT_TABLE(DatabaseRegistrationDialog, BaseDialog)
     EVT_TEXT(DatabaseRegistrationDialog::ID_textcontrol_library, DatabaseRegistrationDialog::OnSettingsChange)
 END_EVENT_TABLE()
 
+// void DatabaseRegistrationDialog::OnBrowseButtonClick(wxCommandEvent& WXUNUSED(event))
+// {
+//     wxString path = ::wxFileSelector(_("Select database file"), "", "", "",
+//         _("Firebird database files (*.fdb, *.gdb)|*.fdb;*.gdb|All files (*.*)|*.*"),
+//         wxFD_OPEN, this);
+//     if (!path.empty())
+//         text_ctrl_dbpath->SetValue(path);
+// }
+
 void DatabaseRegistrationDialog::OnBrowseButtonClick(wxCommandEvent& WXUNUSED(event))
 {
-    wxString path = ::wxFileSelector(_("Select database file"), "", "", "",
+    // Declare a string to hold the path of the last used directory.
+    wxString lastUsedDirectory;
+
+    // Build a cross-platform configuration directory path.
+    // `wxStandardPaths::Get().GetUserConfigDir()` retrieves the user's configuration directory.
+    // `wxFILE_SEP_PATH` ensures the correct path separator is used for the current platform (e.g., '/' on Linux, '\\' on Windows).
+    // This ".flamerobin" is a hidden directory that will store the configuration file
+    wxString configDir = wxStandardPaths::Get().GetUserConfigDir() + wxFILE_SEP_PATH + ".flamerobin";
+
+    // Check if the configuration directory exists. If it doesn't, create it
+    if ( ! wxDirExists(configDir) ) 
+    {
+        // Create the directory if it doesn't exist
+        wxMkdir(configDir); 
+    }
+
+    // Construct the full path to the configuration file, which is stored inside the user-specific directory
+    wxString configPath = configDir + wxFILE_SEP_PATH + "flamerobin.conf";
+
+    // Create a configuration object using a user-specific config file path.
+    wxFileConfig config("flamerobin", "", configPath);
+
+    // Read last used directory from configuration
+    config.Read("LastDatabaseDir", &lastUsedDirectory);
+
+    // Use this directory as the initial directory
+    wxString initialDir = lastUsedDirectory.IsEmpty() ? wxString() : lastUsedDirectory; 
+
+
+    wxString path = ::wxFileSelector(
+        _("Select or create database file"),
+        initialDir, "", "", 
         _("Firebird database files (*.fdb, *.gdb)|*.fdb;*.gdb|All files (*.*)|*.*"),
-        wxFD_OPEN, this);
-    if (!path.empty())
-        text_ctrl_dbpath->SetValue(path);
+        wxFD_SAVE | wxFD_OVERWRITE_PROMPT,
+        this
+    );
+
+    if ( ! path.empty() )
+    {
+        wxFileName fileName(path);
+        wxString ext = fileName.GetExt();
+    
+        // Check if the file extension is not "fdb" (case-insensitive)
+        if ( ! ext.IsSameAs("fdb", false) ) // case-insensitive comparison
+        {
+            // If the extension is missing or different, set it to ".fdb"
+            fileName.SetExt("fdb");
+        }
+    
+        // Update the text control with the full path including the corrected extension
+        text_ctrl_dbpath->SetValue(fileName.GetFullPath());
+
+    
+        config.Write("LastDatabaseDir", fileName.GetPath()); // Write the new directory value to the configuration
+        config.Flush(); // Save immediately
+    }
 }
 
 void DatabaseRegistrationDialog::OnBrowseLibraryButtonClick(wxCommandEvent& WXUNUSED(event))
