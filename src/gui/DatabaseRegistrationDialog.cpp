@@ -456,6 +456,8 @@ void DatabaseRegistrationDialog::OnBrowseButtonClick(wxCommandEvent& WXUNUSED(ev
     // Declare a string to hold the path of the last used directory.
     wxString lastUsedDirectory;
 
+    bool flagFlush = true; 
+
     // Build a cross-platform configuration directory path.
     // `wxStandardPaths::Get().GetUserConfigDir()` retrieves the user's configuration directory.
     // `wxFILE_SEP_PATH` ensures the correct path separator is used for the current platform (e.g., '/' on Linux, '\\' on Windows).
@@ -465,8 +467,11 @@ void DatabaseRegistrationDialog::OnBrowseButtonClick(wxCommandEvent& WXUNUSED(ev
     // Check if the configuration directory exists. If it doesn't, create it
     if ( ! wxDirExists(configDir) ) 
     {
-        // Create the directory if it doesn't exist
-        wxMkdir(configDir); 
+        // Try to create the directory and check if it succeeded
+        if ( ! wxMkdir(configDir) )
+        {
+            wxLogError("Failed to create config directory: %s", configDir);
+        }
     }
 
     // Construct the full path to the configuration file, which is stored inside the user-specific directory
@@ -505,9 +510,19 @@ void DatabaseRegistrationDialog::OnBrowseButtonClick(wxCommandEvent& WXUNUSED(ev
         // Update the text control with the full path including the corrected extension
         text_ctrl_dbpath->SetValue(fileName.GetFullPath());
 
-    
-        config.Write("LastDatabaseDir", fileName.GetPath()); // Write the new directory value to the configuration
-        config.Flush(); // Save immediately
+
+        // Write the new directory value to the configuration
+        if ( ! config.Write("LastDatabaseDir", fileName.GetPath()) )
+        {
+            flagFlush = false;
+
+            wxLogError("Failed to write LastDatabaseDir to config file.");
+        }
+
+        if (flagFlush == true)
+        {
+            config.Flush(); // Save immediately
+        }
     }
 }
 
