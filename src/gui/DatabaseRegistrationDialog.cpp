@@ -451,6 +451,7 @@ END_EVENT_TABLE()
 //         text_ctrl_dbpath->SetValue(path);
 // }
 
+
 void DatabaseRegistrationDialog::OnBrowseButtonClick(wxCommandEvent& WXUNUSED(event))
 {
     // Declare a string to hold the path of the last used directory.
@@ -470,7 +471,13 @@ void DatabaseRegistrationDialog::OnBrowseButtonClick(wxCommandEvent& WXUNUSED(ev
         // Try to create the directory and check if it succeeded
         if ( ! wxMkdir(configDir) )
         {
-            wxLogError("Failed to create config directory: %s", configDir);
+            // Log the error for debugging or tracking purposes
+            wxLogError("Failed to create configuration directory : %s", configDir);
+
+            // Display an error message in a message box
+            wxMessageBox("Failed to create configuration directory : \n" + configDir,
+                "Directory Creation Error", wxICON_ERROR | wxOK
+            );
         }
     }
 
@@ -488,7 +495,7 @@ void DatabaseRegistrationDialog::OnBrowseButtonClick(wxCommandEvent& WXUNUSED(ev
 
 
     wxString path = ::wxFileSelector(
-        _("Select or create database file"),
+        _("Create database file"),
         initialDir, "", "", 
         _("Firebird database files (*.fdb, *.gdb)|*.fdb;*.gdb|All files (*.*)|*.*"),
         wxFD_SAVE | wxFD_OVERWRITE_PROMPT,
@@ -514,17 +521,29 @@ void DatabaseRegistrationDialog::OnBrowseButtonClick(wxCommandEvent& WXUNUSED(ev
         // Write the new directory value to the configuration
         if ( ! config.Write("LastDatabaseDir", fileName.GetPath()) )
         {
-            flagFlush = false;
+            // Log the error for debugging or tracking purposes
+            wxLogError("Failed to write to the configuration file : %s", configPath);
 
-            wxLogError("Failed to write LastDatabaseDir to config file.");
-        }
+            wxMessageBox("Failed to save configuration file : \n" + configPath,
+                "Configuration Error", wxICON_ERROR | wxOK
+            );
 
-        if (flagFlush == true)
-        {
-            config.Flush(); // Save immediately
+        } else {
+
+            // Save immediately and check for flush success
+            if ( ! config.Flush() )
+            {
+                // Log the error for debugging or tracking purposes
+                wxLogError("Failed to save to the configuration file : %s", configPath);
+
+                wxMessageBox("Failed to save to the configuration file : \n" + configPath,
+                            "Configuration Error", wxICON_ERROR | wxOK
+                );
+            }
         }
     }
 }
+
 
 void DatabaseRegistrationDialog::OnBrowseLibraryButtonClick(wxCommandEvent& WXUNUSED(event))
 {
