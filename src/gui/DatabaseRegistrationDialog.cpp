@@ -40,12 +40,6 @@
 #include "gui/StyleGuide.h"
 #include "metadata/database.h"
 #include "metadata/server.h"
-#include <wx/config.h>
-#include <wx/fileconf.h>
-
-
-
-
 
 DatabaseRegistrationDialog::DatabaseRegistrationDialog(wxWindow* parent,
         const wxString& title, bool createDB, bool connectAs)
@@ -451,97 +445,37 @@ END_EVENT_TABLE()
 //         text_ctrl_dbpath->SetValue(path);
 // }
 
-
 void DatabaseRegistrationDialog::OnBrowseButtonClick(wxCommandEvent& WXUNUSED(event))
 {
-    // Declare a string to hold the path of the last used directory.
+    // If available, retrieve the last directory used to create a database file.
+    // The value in question is stored using FlameRobin's internal configuration system
     wxString lastUsedDirectory;
-
-    // Build a cross-platform configuration directory path.
-    // `wxStandardPaths::Get().GetUserConfigDir()` retrieves the user's configuration directory.
-    // `wxFILE_SEP_PATH` ensures the correct path separator is used for the current platform (e.g., '/' on Linux, '\\' on Windows).
-    // This ".flamerobin" is a hidden directory that will store the configuration file
-    wxString configDir = wxStandardPaths::Get().GetUserConfigDir() + wxFILE_SEP_PATH + ".flamerobin";
-
-    // Check if the configuration directory exists. If it doesn't, create it
-    if ( ! wxDirExists(configDir) ) 
-    {
-        // Try to create the directory and check if it succeeded
-        if ( ! wxMkdir(configDir) )
-        {
-            // Log the error for debugging or tracking purposes
-            wxLogError("Failed to create configuration directory : %s", configDir);
-
-            // Display an error message in a message box
-            wxMessageBox("Failed to create configuration directory : \n" + configDir,
-                "Directory Creation Error", wxICON_ERROR | wxOK
-            );
-        }
-    }
-
-    // Construct the full path to the configuration file, which is stored inside the user-specific directory
-    wxString configPath = configDir + wxFILE_SEP_PATH + "flamerobin.conf";
-
-    // Create a configuration object using a user-specific config file path.
-    wxFileConfig config("flamerobin", "", configPath);
-
-    // Read last used directory from configuration
-    config.Read("LastDatabaseDir", &lastUsedDirectory);
-
-    // Use this directory as the initial directory
-    wxString initialDir = lastUsedDirectory.IsEmpty() ? wxString() : lastUsedDirectory; 
+    config().getValue("LastDatabaseDir", lastUsedDirectory);
 
 
+    // Show a file selector dialog for the user to choose where to create the database file.
+    // If it was saved, the initial directory will be the last one used.
     wxString path = ::wxFileSelector(
         _("Create database file"),
-        initialDir, "", "", 
+        lastUsedDirectory, "", "", 
         _("Firebird database files (*.fdb, *.gdb)|*.fdb;*.gdb|All files (*.*)|*.*"),
         wxFD_SAVE | wxFD_OVERWRITE_PROMPT,
         this
     );
 
+    // If the user selected a file path
     if ( ! path.empty() )
     {
+        // Display the selected path in the associated text control
+        text_ctrl_dbpath -> SetValue(path);
+
+        // Extract the directory part from the selected path
         wxFileName fileName(path);
-        wxString ext = fileName.GetExt();
-    
-        // Check if the file extension is not "fdb" (case-insensitive)
-        if ( ! ext.IsSameAs("fdb", false) ) // case-insensitive comparison
-        {
-            // If the extension is missing or different, set it to ".fdb"
-            fileName.SetExt("fdb");
-        }
-    
-        // Update the text control with the full path including the corrected extension
-        text_ctrl_dbpath->SetValue(fileName.GetFullPath());
 
-
-        // Write the new directory value to the configuration
-        if ( ! config.Write("LastDatabaseDir", fileName.GetPath()) )
-        {
-            // Log the error for debugging or tracking purposes
-            wxLogError("Failed to write to the configuration file : %s", configPath);
-
-            wxMessageBox("Failed to save configuration file : \n" + configPath,
-                "Configuration Error", wxICON_ERROR | wxOK
-            );
-
-        } else {
-
-            // Save immediately and check for flush success
-            if ( ! config.Flush() )
-            {
-                // Log the error for debugging or tracking purposes
-                wxLogError("Failed to save to the configuration file : %s", configPath);
-
-                wxMessageBox("Failed to save to the configuration file : \n" + configPath,
-                            "Configuration Error", wxICON_ERROR | wxOK
-                );
-            }
-        }
+        // Store the path as the last used directory for future use
+        config().setValue("LastDatabaseDir", fileName.GetPath());
     }
 }
-
 
 void DatabaseRegistrationDialog::OnBrowseLibraryButtonClick(wxCommandEvent& WXUNUSED(event))
 {
