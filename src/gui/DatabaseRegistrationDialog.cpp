@@ -447,13 +447,18 @@ END_EVENT_TABLE()
 
 void DatabaseRegistrationDialog::OnBrowseButtonClick(wxCommandEvent& WXUNUSED(event))
 {
-    // If available, retrieve the last directory used to create a database file.
-    // The value in question is stored using FlameRobin's internal configuration system
     wxString lastUsedDirectory;
-    config().getValue("LastDatabaseDir", lastUsedDirectory);
 
+    // If available, retrieve the last directory used to create a database file. 
+    // The value in question is stored using FlameRobin's internal configuration 
+    // system (this is not a blocking action)
+    if ( ! config().getValue("LastDatabaseDir", lastUsedDirectory) )
+    {
+        wxLogWarning("Could not retrieve [ LastDatabaseDir ] from configuration.");
+    }
+  
 
-    // Show a file selector dialog for the user to choose where to create the database file.
+    // Show a file selector dialog for the `user` to choose where to create the database file.
     // If it was saved, the initial directory will be the last one used.
     wxString path = ::wxFileSelector(
         _("Create database file"),
@@ -463,17 +468,49 @@ void DatabaseRegistrationDialog::OnBrowseButtonClick(wxCommandEvent& WXUNUSED(ev
         this
     );
 
-    // If the user selected a file path
+    // If the `user` selected/encoded a file path
     if ( ! path.empty() )
     {
-        // Display the selected path in the associated text control
+        // Wrap the full selected/encoded file path for extracting the directory part later
+        wxFileName fileName(path); 
+
+        // Extract the directory from the full file path
+        wxString path_dir = fileName.GetPath();
+
+        // Check if the `dirname` of the encoded/selected path exists
+        if ( ! wxFileName::DirExists(path_dir) ) 
+        {
+            // Log the error for debugging or tracking purposes
+            wxLogError("The specified directory does not exist : %s", path_dir);
+
+            // Display an error message in a message box
+            wxMessageBox("The specified directory does not exist : \n" + path_dir,
+                "Directory Not Found", wxICON_ERROR | wxOK
+            );
+
+            return;
+        }
+    
+        // Check if the `user` is allowed to write to the target directory
+        if ( ! wxFileName::IsDirWritable(path_dir) ) 
+        {
+            wxLogError("Write access denied, the specified directory is not writable : %s", path_dir);
+
+            wxMessageBox("You do not have permission to write to the specified directory : \n" + path_dir,
+                         "Write Permission Error", wxICON_ERROR | wxOK);
+
+            return;
+        }
+
+        // Display the selected/encoded path in the associated text control
         text_ctrl_dbpath -> SetValue(path);
 
-        // Extract the directory part from the selected path
-        wxFileName fileName(path);
 
-        // Store the path as the last used directory for future use
-        config().setValue("LastDatabaseDir", fileName.GetPath());
+        // Store the path as the last used directory for future use (this is not a blocking action)
+        if ( ! config().setValue("LastDatabaseDir", fileName.GetPath()) )
+        {
+            wxLogWarning("Unable to save [ LastDatabaseDir ] to the configuration.");
+        }
     }
 }
 
