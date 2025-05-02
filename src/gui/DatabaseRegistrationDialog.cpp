@@ -454,7 +454,7 @@ void DatabaseRegistrationDialog::OnBrowseButtonClick(wxCommandEvent& WXUNUSED(ev
     // system (this is not a blocking action)
     if ( ! config().getValue("LastDatabaseDir", lastUsedDirectory) )
     {
-        wxLogWarning("Could not retrieve [ LastDatabaseDir ] from configuration.");
+        wxLogWarning("Could not retrieve [ LastDatabaseDir ] from configuration (normal for first use).");
     }
   
 
@@ -483,11 +483,6 @@ void DatabaseRegistrationDialog::OnBrowseButtonClick(wxCommandEvent& WXUNUSED(ev
             // Log the error for debugging or tracking purposes
             wxLogError("The specified directory does not exist : %s", path_dir);
 
-            // Display an error message in a message box
-            wxMessageBox("The specified directory does not exist : \n" + path_dir,
-                "Directory Not Found", wxICON_ERROR | wxOK
-            );
-
             return;
         }
     
@@ -495,9 +490,6 @@ void DatabaseRegistrationDialog::OnBrowseButtonClick(wxCommandEvent& WXUNUSED(ev
         if ( ! wxFileName::IsDirWritable(path_dir) ) 
         {
             wxLogError("Write access denied, the specified directory is not writable : %s", path_dir);
-
-            wxMessageBox("You do not have permission to write to the specified directory : \n" + path_dir,
-                         "Write Permission Error", wxICON_ERROR | wxOK);
 
             return;
         }
