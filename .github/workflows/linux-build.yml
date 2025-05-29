@@ -20,7 +20,7 @@ jobs:
     # Installing required dependencies
     - name: Install dependencies
       run: |
-        sudo apt update
+        sudo apt  update
         sudo apt install -y build-essential cmake libwxgtk3.2-dev dpkg-dev libfbclient2 firebird3.0-server firebird3.0-utils firebird-dev firebird3.0-server-core firebird3.0-common rsync
         sudo ldconfig
 
